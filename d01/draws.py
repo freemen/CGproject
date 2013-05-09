@@ -31,13 +31,18 @@ class Showing:
         self.drawPoint(event.x, event.y)
     
     def drawLine(self, event):
-        self.show.create_line(0,10,event.x,event.y,fill=self.color)
+        self.show.create_line(400,310,event.x,event.y,fill=self.color)
 
 
     functions = {
         'nothing': doNothing,
         'dot': drawDot,
         'line': drawLine,
+        'polygon': doNothing,
+        'filledpolygon': doNothing,
+        'twoDtrans': doNothing,
+        'cut': doNothing,
+        'animation': doNothing,
         }
         
 class Choice:
@@ -54,13 +59,27 @@ class Choice:
         self.dotB.grid(row=2,column=0, sticky=N)        
         self.lineB = Button(tk,text="画线",command = self.line, width = 20, height=2, bg = self.defaultcolor)
         self.lineB.grid(row=3,column=0, sticky=N)
+        self.polygonB = Button(tk,text="画多边形",command = self.polygon, width = 20, height=2, bg = self.defaultcolor)
+        self.polygonB.grid(row=4,column=0, sticky=N)
+        self.filledpolygonB = Button(tk,text="填充的多边形",command = self.filledpolygon, width = 20, height=2, bg = self.defaultcolor)
+        self.filledpolygonB.grid(row=5,column=0, sticky=N)
+        self.twoDtransB = Button(tk,text="二维变换",command = self.twoDtrans, width = 20, height=2, bg = self.defaultcolor)
+        self.twoDtransB.grid(row=6,column=0, sticky=N)
+        self.cutB = Button(tk,text="裁剪",command = self.cut, width = 20, height=2, bg = self.defaultcolor)
+        self.cutB.grid(row=7,column=0, sticky=N)
+        self.animationB = Button(tk,text="关键帧动画",command = self.animation, width = 20, height=2, bg = self.defaultcolor)
+        self.animationB.grid(row=8,column=0, sticky=N)
 
-        self.byeB = Button(tk,text="说Bye!",command = tk.quit, width = 20, height=2, bg = self.nowcolor)
-        self.byeB.grid(row=90,column=0, sticky=N)
-
+        self.byeB = Button(tk,text="say GoodBye~",command = tk.quit, width = 20, height=2, bg = self.defaultcolor)
+        self.byeB.grid(row=90,column=0, sticky=N) 
         self.buttons = {
             'dot': self.dotB,
             'line': self.lineB,
+            'polygon': self.polygonB,
+            'filledpolygon': self.filledpolygonB,
+            'twoDtrans': self.twoDtransB,
+            'cut': self.cutB,
+            'animation': self.animationB,
             
             'bye': self.byeB,
             }    
@@ -71,6 +90,26 @@ class Choice:
         
     def line(self):
         self.target.state = 'line'
+        self.setFocus()
+
+    def polygon(self):
+        self.target.state = 'polygon'
+        self.setFocus()
+
+    def filledpolygon(self):
+        self.target.state = 'filledpolygon'
+        self.setFocus()
+
+    def twoDtrans(self):
+        self.target.state = 'twoDtrans'
+        self.setFocus()
+
+    def cut(self):
+        self.target.state = 'cut'
+        self.setFocus()
+        
+    def animation(self):
+        self.target.state = 'animation'
         self.setFocus()
 
     def setFocus(self):
