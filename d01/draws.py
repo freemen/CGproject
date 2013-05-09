@@ -5,6 +5,33 @@ def initView(tk):
     tk.title("本来应该是non_Chinese，但是现在加了encoding就可以了")
     tk.minsize(800,500)
     tk.maxsize(1000,600)
+
+class VertexGroup:
+    def __init__(self):
+        self.clear()
+
+    def clear(self):
+        self.vertexs = []
+        #self.state = 'noPoint'
+
+    def addPoint(self, x, y):
+        if self.vertexs:
+            self.lastVertex = self.vertexs[-1]
+        else:
+            self.lastVertex = []
+        self.vertexs.append([x,y])
+        return self.lastVertex
+
+class Bresenham:
+    def __init__(self, canvas):
+        self.canvas = canvas
+        
+
+    def draw(x1, y1, x2, y2):
+        dx = x2 - x1
+        dy = y2 - y1
+        
+        
     
 class Showing:
     def __init__(self, tk):
@@ -14,14 +41,18 @@ class Showing:
         self.show.bind('<Button-1>',self.press)
 
         self.color = "#222"
+        self.fillcolor = "#259"
         self.state = 'nothing'
+
+        self.vGroup = VertexGroup()
+        self.forLine = Bresenham(self)
         
+    def press(self, event):
+        returnValue = self.functions[self.state](self, event)
+                
     def drawPoint(self, x, y):
         self.show.create_line(x, y ,x+1 ,y+1 , fill=self.color)
 
-    def press(self, event):
-        returnValue = self.functions[self.state](self, event)
-        
     def doNothing(self, event):
         for i in range(-4,5):
             for j in range(-4,5):
@@ -31,7 +62,10 @@ class Showing:
         self.drawPoint(event.x, event.y)
     
     def drawLine(self, event):
-        self.show.create_line(400,310,event.x,event.y,fill=self.color)
+        firstV = self.vGroup.addPoint(event.x, event.y)
+        if firstV:
+            self.forLine.draw(firstV[0], firstV[1], event.x, event.y)
+            self.vGroup.clear()
 
 
     functions = {
