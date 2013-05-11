@@ -10,19 +10,20 @@ def initView(tk):
 
 class VertexGroup:
     class EdgeTable:
-        def __init__(self):
+        def __init__(self, canvas):
+            self.canvas = canvas
             self.edgeList = {}
         def insert(self, y, x0, dx, ymax):
             if not y in self.edgeList:
-                self.degeList[y] = []
+                self.edgeList[y] = []
             #TODO:should be insert by sort
             newE = {'x': x0, 'dx': dx, 'ymax': ymax}
-            if newE in edgeList[y]:
-                edgeList[y].remove(newE)
-            else
-                for i in edgeList[y]:
+            if newE in self.edgeList[y]:
+                self.edgeList[y].remove(newE)
+            else:
+                for i in self.edgeList[y]:
                     if i['x']> x0:
-                        edgeList[y].insert(edgeList[y].index(i), newE)
+                        self.edgeList[y].insert(self.edgeList[y].index(i), newE)
                         break
             #self.edgeList[y].append({'x': x0, 'dx': dx, 'ymax': ymax})
 
@@ -30,32 +31,39 @@ class VertexGroup:
             return ((v1[0]-v2[0])/(v1[1]-v2[1]))
         def initN(self, lastV, newV, firstV):
             if newV[1] < lastV[1]:
-                dx = calcDx(newV, lastV)
-                self.edgeList[newV[1]+0.5, newV[0], dx, lastV[1])
+                dx = self.calcDx(newV, lastV)
+                self.edgeList(newV[1]+0.5, newV[0], dx, lastV[1])
         def updateN(self, lastV, newV, firstV):
+            #here should the [1] should add 0.5
             if newV[1] < lastV[1]:#mode 1: judge by if-else
-                dx = calcDx(newV, lastV)
-                self.insert([(newV[1]+0.5*dx), min(newV[0], lastV[0]), dx, lastV[1]])
+                dx = self.calcDx(newV, lastV)
+                self.insert(newV[1], (min(newV[0], lastV[0])+0.5*dx), dx, lastV[1])
             elif newV[1] > lastV[1]:
-                dx = calcDx(newV, lastV)
-                self.insert([(lastV[1]+0.5*dx), min(newV[0], lastV[0]), dx, newV[1]])
+                dx = self.calcDx(newV, lastV)
+                self.insert(lastV[1], (min(newV[0], lastV[0])+0.5*dx), dx, newV[1])
             if not newV[1] == firstV[1]:#mode 2: judge by the min and max function
-                dx = calcDx(newV, firstV)
-                self.insert([(min(newV[1], firstV[1])+0.5*dx), min(newV[0], firstV[0]), dx, max(newV[1], firstV[1])])
+                dx = self.calcDx(newV, firstV)
+                self.insert(min(newV[1], firstV[1]), (min(newV[0], firstV[0])+0.5*dx), dx, max(newV[1], firstV[1]))
             if not lastV[1] == firstV[1]:
-                dx = calcDx((min(lastV, firstV)
-                self.insert([(min(lastV[1], firstV[1])+0.5*dx), min(lastV[0], firstV[0]), dx, max(lastV[1], firstV[1])])
+                dx = self.calcDx(lastV, firstV)
+                self.insert(min(lastV[1], firstV[1]), (min(lastV[0], firstV[0])+0.5*dx), dx, max(lastV[1], firstV[1]))
+        def generateAET(self, NET):
+            
+            miny = min(NET.edgeList.keys())
+            
               
     
-    def __init__(self):
+    def __init__(self, canvas):
+        self.canvas = canvas
         self.clear()
 
     def clear(self):
         self.vertexs = []
-        self.NET = self.EdgeTable()
-        self.AET = self.EdgeTable()
+        self.NET = self.EdgeTable(self.canvas)
+        self.AET = self.EdgeTable(self.canvas)
 
     def addPoint(self, x, y):
+        print 'x:', x, ' y:', y
         if self.vertexs:
             self.lastVertex = self.vertexs[-1]
             if len(self.vertexs) >= 2:
@@ -69,6 +77,9 @@ class VertexGroup:
         return self.lastVertex
     def close(self):
         return self.vertexs[-1], self.vertexs[0]
+
+    def genAET(self):
+        self.AET.generate(self.NET)
 
 class Bresenham:
     def __init__(self, canvas):
@@ -124,7 +135,7 @@ class Showing:
         self.fillcolor = "#259"
         self.state = 'nothing'
 
-        self.vGroup = VertexGroup()
+        self.vGroup = VertexGroup(self)
         self.forLine = Bresenham(self)
         
     def press(self, event):
@@ -165,13 +176,16 @@ class Showing:
         self.forLine.draw(endV[0], endV[1], beginV[0], beginV[1])
         self.vGroup.clear()        
 
+    def fillPolygon(self, event):
+        self.drawPolygon(event)
+        self.vGroup.genAET()
 
     functions = {
         'nothing': doNothing,
         'dot': drawDot,
         'line': drawLine,
         'polygon': drawPolygon,
-        'filledpolygon': doNothing,
+        'filledpolygon': fillPolygon,
         'twoDtrans': doNothing,
         'cut': doNothing,
         'animation': doNothing,
