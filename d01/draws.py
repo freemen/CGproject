@@ -1,25 +1,71 @@
 #-*- coding: utf-8 -*-
 #! encoding:utf-8
 from Tkinter import *
+import time
+
 def initView(tk):
     tk.title("本来应该是non_Chinese，但是现在加了encoding就可以了")
     tk.minsize(800,500)
     tk.maxsize(1000,600)
 
 class VertexGroup:
+    class EdgeTable:
+        def __init__(self):
+            self.edgeList = {}
+        def insert(self, y, x0, dx, ymax):
+            if not y in self.edgeList:
+                self.degeList[y] = []
+            #TODO:should be insert by sort
+            newE = {'x': x0, 'dx': dx, 'ymax': ymax}
+            if newE in edgeList[y]:
+                edgeList[y].remove(newE)
+            else
+                for i in edgeList[y]:
+                    if i['x']> x0:
+                        edgeList[y].insert(edgeList[y].index(i), newE)
+                        break
+            #self.edgeList[y].append({'x': x0, 'dx': dx, 'ymax': ymax})
+
+        def calcDx(self, v1, v2):
+            return ((v1[0]-v2[0])/(v1[1]-v2[1]))
+        def initN(self, lastV, newV, firstV):
+            if newV[1] < lastV[1]:
+                dx = calcDx(newV, lastV)
+                self.edgeList[newV[1]+0.5, newV[0], dx, lastV[1])
+        def updateN(self, lastV, newV, firstV):
+            if newV[1] < lastV[1]:#mode 1: judge by if-else
+                dx = calcDx(newV, lastV)
+                self.insert([(newV[1]+0.5*dx), min(newV[0], lastV[0]), dx, lastV[1]])
+            elif newV[1] > lastV[1]:
+                dx = calcDx(newV, lastV)
+                self.insert([(lastV[1]+0.5*dx), min(newV[0], lastV[0]), dx, newV[1]])
+            if not newV[1] == firstV[1]:#mode 2: judge by the min and max function
+                dx = calcDx(newV, firstV)
+                self.insert([(min(newV[1], firstV[1])+0.5*dx), min(newV[0], firstV[0]), dx, max(newV[1], firstV[1])])
+            if not lastV[1] == firstV[1]:
+                dx = calcDx((min(lastV, firstV)
+                self.insert([(min(lastV[1], firstV[1])+0.5*dx), min(lastV[0], firstV[0]), dx, max(lastV[1], firstV[1])])
+              
+    
     def __init__(self):
         self.clear()
 
     def clear(self):
         self.vertexs = []
-        #self.state = 'noPoint'
+        self.NET = self.EdgeTable()
+        self.AET = self.EdgeTable()
 
     def addPoint(self, x, y):
         if self.vertexs:
             self.lastVertex = self.vertexs[-1]
-        else:
+            if len(self.vertexs) >= 2:
+                self.NET.updateN(self.lastVertex, [x, y], self.vertexs[0])
+            #if len(self.vertexs) >= 3:
+             #   self.NET.updateN(self.lastVertex, [x, y], self.vertexs[0])#TODOnext 
+        else:           # the first point! and should not update the NET
             self.lastVertex = []
         self.vertexs.append([x,y])
+        
         return self.lastVertex
     def close(self):
         return self.vertexs[-1], self.vertexs[0]
@@ -110,14 +156,14 @@ class Showing:
         lastV = self.vGroup.addPoint(event.x, event.y)
         if lastV:
             self.forLine.draw(lastV[0], lastV[1], event.x, event.y)
+            if [event.x, event.y] == self.vGroup.vertexs[0]:
+                self.vGroup.clear()
         else:
             self.doNothing(event)
-    def endPolygon(self):
+    def closePolygon(self, event):
         endV, beginV = self.vGroup.close()
         self.forLine.draw(endV[0], endV[1], beginV[0], beginV[1])
-        self.vGroup.clear()
-    def closePolygon(self, event):
-        self.endPolygon()
+        self.vGroup.clear()        
 
 
     functions = {
